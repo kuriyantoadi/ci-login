@@ -30,7 +30,7 @@
 
 
   **6. application/config/routes.php ubah baris 52**
-  `$route['default_controller'] = 'C_login';` -> agar index nya langsung ke C_login
+  <br>`$route['default_controller'] = 'C_login';` -> agar index nya langsung ke C_login
 
   **7. Buka dengan Link berikut**
   <br>`localhost/ci-login/index.php`

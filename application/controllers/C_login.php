@@ -1,44 +1,52 @@
 <?php
 
-class C_login extends CI_Controller{
-
-    function __construct(){
+class C_login extends CI_Controller
+{
+    public function __construct()
+    {
         parent::__construct();
         $this->load->model('M_login');
     }
 
-    function index(){
+    public function index()
+    {
         $this->load->view('v_login');
     }
 
-    function aksi_login(){
-        $username = $this->input->post('username');
-        $password = $this->input->post('password');
+    public function auth()
+    {
+        $username = htmlspecialchars($this->input->post('username', true), ENT_QUOTES);
+        $password = htmlspecialchars($this->input->post('password', true), ENT_QUOTES);
 
-        $where = array(
-            'username' => $username,
-            'password' => md5($password)
-        );
 
-        $cek = $this->M_login->cek_login("tb_admin",$where)->num_rows();
-        if ($cek > 0 ){
+        $cek_login = $this->M_login->auth_login($username, $password);
 
-            $data_session = array(
-            'nama' => $username,
-            'status' => 'login'
-            );
+        if ($cek_login->num_rows() > 0) {
+            $data = $cek_login->row_array();
+            $this->session->set_userdata('masuk', true);
 
-            $this->session->set_userdata($data_session);
-
-            redirect(base_url("index.php/c_admin"));
-
-        }else{
-            echo "Username Password anda salah";
+            if ($data['level']=='admin') {
+                $this->session->set_userdata('akses', 'admin');
+                $this->session->set_userdata('ses_id', $data['id']);
+                $this->session->set_userdata('ses_nama', $data['nama']);
+                redirect('c_page');
+            } elseif ($data['level']=='2') {
+                $this->session->set_userdata('akses', '2');
+                $this->session->set_userdata('ses_id', $data['id']);
+                $this->session->set_userdata('ses_nama', $data['nama']);
+                redirect('c_page/admin');
+            } else {
+                $url = base_url();
+                echo $this->session->set_flashdata('msg', 'Username atau password salah');
+                redirect($url);
+            }
         }
     }
 
-    function logout(){
+    public function logout()
+    {
         $this->session->sess_destroy();
-        redirect(base_url('index.php/c_login'));
+        $url = base_url('');
+        redirect($url);
     }
 }
